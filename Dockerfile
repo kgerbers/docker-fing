@@ -14,7 +14,8 @@ RUN apt-get update -qq && \
 RUN mkdir -p /home/fing
 # RUN ls -la /usr/bin
 
-ENTRYPOINT ["/usr/bin/fing", "-n 192.168.1.0/24 -r 1 --session /home/fing/discover.log -o table,json,/home/fing/table.json"]
+#ENTRYPOINT ["/usr/bin/fing"]
+ENTRYPOINT ["/usr/bin/fing", "-n 192.168.1.0/24 -r 100 --session /home/fing/discover.log -o table,json,/home/fing/table.json -d 1"]
 # CMD ["--help"]
 
 # EOF
