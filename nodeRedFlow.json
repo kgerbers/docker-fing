@@ -1,0 +1,285 @@
+[
+    {
+        "id": "8b2b7bd5.7566d8",
+        "type": "file in",
+        "z": "a8062189.5a251",
+        "name": "devices",
+        "filename": "/mnt/table.json",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "x": 460,
+        "y": 280,
+        "wires": [
+            [
+                "97230699.889498"
+            ]
+        ]
+    },
+    {
+        "id": "97230699.889498",
+        "type": "json",
+        "z": "a8062189.5a251",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 590,
+        "y": 280,
+        "wires": [
+            [
+                "ae356bdc.c0c858",
+                "7db790b.4aff57"
+            ]
+        ]
+    },
+    {
+        "id": "2dc62e77.9c4002",
+        "type": "watch",
+        "z": "a8062189.5a251",
+        "name": "",
+        "files": "/mnt/table.json",
+        "recursive": "",
+        "x": 260,
+        "y": 280,
+        "wires": [
+            [
+                "8b2b7bd5.7566d8"
+            ]
+        ]
+    },
+    {
+        "id": "ae356bdc.c0c858",
+        "type": "split",
+        "z": "a8062189.5a251",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "key",
+        "x": 730,
+        "y": 280,
+        "wires": [
+            [
+                "77c843bc.872c5c"
+            ]
+        ]
+    },
+    {
+        "id": "77c843bc.872c5c",
+        "type": "splitter",
+        "z": "a8062189.5a251",
+        "name": "",
+        "property": "payload",
+        "x": 850,
+        "y": 280,
+        "wires": [
+            [
+                "ae233fc3.b3ecd"
+            ]
+        ]
+    },
+    {
+        "id": "73cc3663.b2a6d8",
+        "type": "mqtt out",
+        "z": "a8062189.5a251",
+        "name": "",
+        "topic": "",
+        "qos": "",
+        "retain": "true",
+        "broker": "bc54999b.9e1a38",
+        "x": 1150,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "ae233fc3.b3ecd",
+        "type": "function",
+        "z": "a8062189.5a251",
+        "name": "is_object()",
+        "func": "if(typeof msg.payload === 'object') {\n    return msg;\n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 350,
+        "y": 360,
+        "wires": [
+            [
+                "4142fad9.139734",
+                "7dd9f1f6.a4cc",
+                "18745e79.ac3302"
+            ]
+        ]
+    },
+    {
+        "id": "4142fad9.139734",
+        "type": "function",
+        "z": "a8062189.5a251",
+        "name": "MQTT config transformer",
+        "func": "let host = msg.payload;\nlet newValue = {};\nlet dev_id = host.HardwareAddress.replace(new RegExp(':', 'g'),'_');\nlet topic = host.HardwareAddress.replace(new 
+RegExp(':', 'g'),'');\n\nmsg.topic = \"homeassistant/device_tracker/\" + topic + \"/config\";\n\nmsg.payload = {\n    \"payload_home\": 'up',\n    \"payload_not_home\": 'down',\n    
+\"state_topic\": \"homeassistant/device_tracker/\" + topic + \"/state\",\n    \"json_attributes_topic\": \"homeassistant/device_tracker/\" + topic + \"/attributes\",\n    
+\"source_type\": \"router\",\n    \"name\": (host.Hostname ? host.Hostname : dev_id)\n}\n\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 590,
+        "y": 360,
+        "wires": [
+            [
+                "73cc3663.b2a6d8"
+            ]
+        ]
+    },
+    {
+        "id": "154cb69a.a07529",
+        "type": "inject",
+        "z": "a8062189.5a251",
+        "name": "Manual Trigger",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 260,
+        "y": 220,
+        "wires": [
+            [
+                "8b2b7bd5.7566d8"
+            ]
+        ]
+    },
+    {
+        "id": "7db790b.4aff57",
+        "type": "mqtt out",
+        "z": "a8062189.5a251",
+        "name": "fing/config",
+        "topic": "fing/config",
+        "qos": "",
+        "retain": "",
+        "broker": "bc54999b.9e1a38",
+        "x": 750,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "7dd9f1f6.a4cc",
+        "type": "function",
+        "z": "a8062189.5a251",
+        "name": "MQTT state transformer",
+        "func": "let host = msg.payload;\nlet newValue = {};\nlet dev_id = host.HardwareAddress.replace(new RegExp(':', 'g'),'_');\nlet topic = host.HardwareAddress.replace(new 
+RegExp(':', 'g'),'');\n\n//let base_topic = \"homeassistant/device_tracker/\"+ topic;\n\nmsg.topic = \"homeassistant/device_tracker/\" + topic + \"/state\";\n\nmsg.payload = 
+host.State;\n\n\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 590,
+        "y": 420,
+        "wires": [
+            [
+                "e97de3bd.fa15b"
+            ]
+        ]
+    },
+    {
+        "id": "e97de3bd.fa15b",
+        "type": "delay",
+        "z": "a8062189.5a251",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "1",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 980,
+        "y": 420,
+        "wires": [
+            [
+                "73cc3663.b2a6d8"
+            ]
+        ]
+    },
+    {
+        "id": "18745e79.ac3302",
+        "type": "function",
+        "z": "a8062189.5a251",
+        "name": "MQTT attribute transformer",
+        "func": "let host = msg.payload;\nlet dev_id = host.HardwareAddress.replace(new RegExp(':', 'g'),'_');\nlet topic = host.HardwareAddress.replace(new RegExp(':', 
+'g'),'');\n\nmsg.topic = \"homeassistant/device_tracker/\" + topic + \"/attributes\";\nmsg.payload = {\n    'source': 'Fing',\n    'name': host.Name,\n    'hostname': 
+host.Hostname,\n    'mac': host.HardwareAddress,\n    'address': host.Address,\n    'vendor': host.Vendor,\n    'state': host.State,\n    'last_change_time': 
+host.LastChangeTime\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 600,
+        "y": 480,
+        "wires": [
+            [
+                "72157066.07969"
+            ]
+        ]
+    },
+    {
+        "id": "72157066.07969",
+        "type": "delay",
+        "z": "a8062189.5a251",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "500",
+        "timeoutUnits": "milliseconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 810,
+        "y": 480,
+        "wires": [
+            [
+                "e97de3bd.fa15b"
+            ]
+        ]
+    },
+    {
+        "id": "bc54999b.9e1a38",
+        "type": "mqtt-broker",
+        "name": "localhost",
+        "broker": "192.168.1.16",
+        "port": "1883",
+        "clientid": "home_control_nodered",
+        "usetls": false,
+        "compatmode": false,
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "nodered/state",
+        "birthQos": "0",
+        "birthPayload": "on",
+        "closeTopic": "nodered/state",
+        "closeQos": "0",
+        "closePayload": "off",
+        "willTopic": "nodered/state",
+        "willQos": "0",
+        "willPayload": "off"
+    }
+]
